@@ -49,6 +49,10 @@ class Heap {
             return nodes.size() == 0;
         }
         
+        int size () {
+            return nodes.size();
+        }
+        
         int getHeapRootValue () {
             if (isEmpty())  return INT_MIN;
             return nodes[0];
@@ -74,10 +78,16 @@ class Heap {
             if (isEmpty())  return INT_MIN;
             int rootVal = nodes[0];
             swap (0, nodes.size()-1);
+            nodes.pop_back();
             // adjust new root
             if (!nodes.empty() > 0)
                 shiftDown(0);
             return rootVal;
+        }
+        
+        int top () {
+            if (isEmpty())  return INT_MIN;
+            return nodes[0];
         }
         
     private:
@@ -135,3 +145,44 @@ public:
         minHeap.getNodesValues(nums);
     }
 };
+
+
+
+/* Tested on LintCode Problem 81: Data Stream Median */
+class Solution {
+public:
+    /**
+     * @param nums: A list of integers.
+     * @return: The median of numbers
+     */
+    vector<int> medianII(vector<int> &nums) {
+        // min queue size <= max queue size + 1
+        vector<int> result;
+        if (nums.empty())  return result;
+        int median = nums[0];
+        result.push_back(median);
+        Heap maxHeap(true);
+        // change default max heap setting to min heap
+        Heap minHeap(false);
+        for (int i = 1; i < nums.size(); i++) {
+            if (nums[i] >= median) 
+                minHeap.push(nums[i]);
+            else
+                maxHeap.push(nums[i]);
+            // rebalance the two heaps
+            if (maxHeap.size() > minHeap.size()) {
+                minHeap.push(median);
+                median = maxHeap.top();
+                maxHeap.pop();
+            }
+            if (maxHeap.size() + 1 < minHeap.size()) {
+                maxHeap.push(median);
+                median = minHeap.top();
+                minHeap.pop();
+            }
+            result.push_back(median);
+        }
+        return result;
+    }
+};
+

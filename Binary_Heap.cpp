@@ -19,6 +19,10 @@ class Heap {
             isMaxHeap = isMax;
         }
         
+        Heap(bool isMax = true) {
+            isMaxHeap = isMax;
+        }
+        
         Heap (vector<int> &values, bool isMax = true) {
             int size = values.size();
             nodes.resize(size);
@@ -51,7 +55,7 @@ class Heap {
         }
         
         /* Insertion: Return true/false to indicate if insertion is successful*/
-        bool insert(int val) {
+        bool push (int val) {
             // need to throw an exception if memory alloc fails
             nodes.push_back(val); // insert at the end first
             // check heap condition recursively on its parent node
@@ -66,7 +70,7 @@ class Heap {
             return true;
         }
         
-        int popHeapRoot () {
+        int pop () {
             if (isEmpty())  return INT_MIN;
             int rootVal = nodes[0];
             swap (0, nodes.size()-1);

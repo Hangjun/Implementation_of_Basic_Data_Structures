@@ -1,7 +1,6 @@
 /* Implementation of a Binary Heap with Nodes Integers. 
 ** One can specify whether a max or a min hep needs to be constructed.
 ** By default, a max heap will be constructed.
-** We assume that there are no duplicates in the heap.
 ** 
 */
 
@@ -23,6 +22,7 @@ class Heap {
             isMaxHeap = isMax;
         }
         
+        /* Build a heap from a given vector: O(n) Time */
         Heap (vector<int> &values, bool isMax = true) {
             int size = values.size();
             nodes.resize(size);
@@ -31,7 +31,7 @@ class Heap {
                 nodes[i] = values[i];
             // adjust to maintain heap condition
             for (int i = size/2; i >= 0; i--)
-                shiftDown(i);
+                percolateDown(i);
         }
         
         ~Heap() {
@@ -45,6 +45,13 @@ class Heap {
                 values[i] = nodes[i];
         }
         
+        void printHeapVals () {
+            if (isEmpty())  return;
+            for (int i = 0; i < nodes.size(); i++)
+                cout << nodes[i] << "  ";
+            cout << endl;
+        }
+        
         bool isEmpty () {
             return nodes.size() == 0;
         }
@@ -53,27 +60,16 @@ class Heap {
             return nodes.size();
         }
         
-        int getHeapRootValue () {
-            if (isEmpty())  return INT_MIN;
-            return nodes[0];
-        }
-        
-        /* Insertion: Return true/false to indicate if insertion is successful*/
-        bool push (int val) {
+        /* Insertion: Return true/false to indicate if insertion is successful */
+        void push (int val) {
             // need to throw an exception if memory alloc fails
             nodes.push_back(val); // insert at the end first
             // check heap condition recursively on its parent node
             int curIndex = nodes.size()-1;
-            int parentIndex = (curIndex-1)/2;
-            while (parentIndex >= 0 && (isMaxHeap && nodes[parentIndex] < nodes[curIndex] || !isMaxHeap && nodes[parentIndex] > nodes[curIndex])) {
-                // swap to maintain the heap condition
-                swap(curIndex, parentIndex);
-                curIndex = parentIndex;
-                parentIndex = (curIndex-1)/2;
-            }
-            return true;
+                percolateUp(curIndex);
         }
         
+        /* Remove the top node */
         int pop () {
             if (isEmpty())  return INT_MIN;
             int rootVal = nodes[0];
@@ -81,13 +77,43 @@ class Heap {
             nodes.pop_back();
             // adjust new root
             if (!nodes.empty() > 0)
-                shiftDown(0);
+                percolateDown(0);
             return rootVal;
         }
         
         int top () {
             if (isEmpty())  return INT_MIN;
             return nodes[0];
+        }
+        
+        int find(int value) {
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes[i] == value) {
+                    return i;
+                }
+            }
+            return -1; // not found
+        }
+        
+        /* Delete the node of the give value: O(n) Time */
+        void deleteNode (int value) {
+            // scan the heap to locate the requested node
+            int curIndex = find (value);
+            if (curIndex == -1)  return; // requested node not found
+            swap (curIndex, nodes.size()-1);
+            nodes.pop_back();
+            int parentIndex = (curIndex-1)/2;
+            if (isMaxHeap) {
+                if (nodes[curIndex] > nodes[parentIndex])
+                    percolateUp(curIndex);
+                else
+                    percolateDown(curIndex);
+            } else {
+                if (nodes[curIndex] < nodes[parentIndex])
+                    percolateUp(curIndex);
+                else
+                    percolateDown(curIndex);
+            }
         }
         
     private:
@@ -97,7 +123,17 @@ class Heap {
             nodes[indy] = tmp;
         }
         
-        void shiftDown (int curIndex) {
+        void percolateUp (int curIndex) {
+            int parentIndex = (curIndex-1)/2;
+            while (parentIndex >=0 && ((isMaxHeap && nodes[parentIndex] < nodes[curIndex]) || (!isMaxHeap && nodes[parentIndex] > nodes[curIndex]))) {
+                // swap to maintain the heap condition
+                swap(curIndex, parentIndex);
+                curIndex = parentIndex;
+                parentIndex = (curIndex-1)/2;
+            }
+        }
+        
+        void percolateDown (int curIndex) {
             int size = nodes.size();
             int leftChild = curIndex*2+1;
             int rightChild = curIndex*2+2;
@@ -185,4 +221,9 @@ public:
         return result;
     }
 };
+
+
+
+        
+        
 
